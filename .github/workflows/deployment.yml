@@ -1,31 +1,44 @@
-name: Publish Website to CPanel
+name: Deploy Laravel to InfinityFree
 on:
   push:
     branches:
       - main
+
 jobs:
-  FTP-Deploy-Action:
-    name: FTP-Deploy-Action
+  deploy:
+    name: Deploy Laravel to InfinityFree
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2.1.0
-      with:
-        fetch-depth: 2 
-    - name: Build assets
-      run: npm install && npm run build
+    - name: Checkout Code
+      uses: actions/checkout@v2
 
     - name: Install PHP and Composer
       uses: shivammathur/setup-php@v2
       with:
-          php-version: '8.2' # Adjust to match the PHP version used by your Laravel project
-          tools: 'composer'
+        php-version: '8.1'
+        tools: composer
 
-    - name: Install PHP dependencies
+    - name: Install Composer Dependencies
       run: composer install --no-dev --optimize-autoloader
-        
-    - name: FTP-Deploy-Action
+
+    - name: Build Assets (Optional)
+      run: |
+        npm install
+        npm run prod
+
+    - name: Prepare Laravel for Production
+      run: |
+        cp .env.example .env
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+
+    - name: Deploy to InfinityFree
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:
         server: ${{ secrets.HOSTNAME }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
+        local-dir: ./  
+        server-dir: /htdocs  
