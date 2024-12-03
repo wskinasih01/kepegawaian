@@ -23,9 +23,7 @@ jobs:
       run: composer install --no-dev --optimize-autoloader
 
     - name: Build Assets (Optional)
-      run: |
-        npm install
-        npm run prod
+      run: npm install && npm run build
 
     - name: Prepare Laravel for Production
       run: |
